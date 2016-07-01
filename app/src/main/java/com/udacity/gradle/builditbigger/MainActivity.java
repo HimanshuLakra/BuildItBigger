@@ -1,19 +1,23 @@
 package com.udacity.gradle.builditbigger;
 
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.udacity.Tell_A_Joke;
 import com.udacity.displayjoke.DisplayJokeActivity;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    InterstitialAd mInterstitialAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,13 +51,57 @@ public class MainActivity extends ActionBarActivity {
 
     public void tellJoke(View view) {
 
-        Tell_A_Joke retreiveJoke = new Tell_A_Joke();
-        Intent intentForLibrary = new Intent(MainActivity.this, DisplayJokeActivity.class);
-        intentForLibrary.putExtra("JavaLibraryJoke", retreiveJoke.getJoke());
-        Toast.makeText(this, retreiveJoke.getJoke(), Toast.LENGTH_SHORT).show();
-        startActivity(intentForLibrary);
+        mInterstitialAd = new InterstitialAd(this);
+
+        // set the ad unit ID
+        mInterstitialAd.setAdUnitId(getString(R.string.interstitial_full_screen_unit_id));
+
+        AdRequest adRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .addTestDevice("552F9665C709A142AFC6998216C347DF")
+                .build();
+
+        // Load ads into Interstitial Ads
+        mInterstitialAd.loadAd(adRequest);
+
+        mInterstitialAd.setAdListener(new AdListener() {
+            public void onAdLoaded() {
+                showInterstitial();
+            }
+
+            @Override
+            public void onAdClosed() {
+                Toast.makeText(getApplicationContext(), "Ad is closed!", Toast.LENGTH_SHORT).show();
+
+                Tell_A_Joke retreiveJoke = new Tell_A_Joke();
+                Intent intentForLibrary = new Intent(MainActivity.this, DisplayJokeActivity.class);
+                intentForLibrary.putExtra("JavaLibraryJoke", retreiveJoke.getJoke());
+                Toast.makeText(MainActivity.this, retreiveJoke.getJoke(), Toast.LENGTH_SHORT).show();
+                startActivity(intentForLibrary);
+            }
+
+            @Override
+            public void onAdFailedToLoad(int errorCode) {
+                Toast.makeText(getApplicationContext(), "Ad failed to load! error code: " + errorCode, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                Toast.makeText(getApplicationContext(), "Ad left application!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAdOpened() {
+                Toast.makeText(getApplicationContext(), "Ad is opened!", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 
+    private void showInterstitial() {
+        if (mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+
+        }
+    }
 
 }
