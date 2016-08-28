@@ -72,6 +72,7 @@ public class MainActivityFragment extends Fragment {
         message.setText(show ? "Loading ..." : getString(R.string.instructions));
     }
 
+
     @Override
     public void onPause() {
         if (mAdView != null) {
@@ -118,7 +119,6 @@ public class MainActivityFragment extends Fragment {
             @Override
             public void onAdClosed() {
                 showProgressBar(true);
-                Toast.makeText(getContext(), "Ad is closed!", Toast.LENGTH_SHORT).show();
                 Tell_A_Joke retreiveJoke = new Tell_A_Joke();
                 new EndpointsAsyncTask().execute(new Pair<Context, String>(getActivity(), retreiveJoke.getJoke()));
             }
@@ -151,6 +151,7 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        showProgressBar(false);
     }
 
 
@@ -195,8 +196,6 @@ public class MainActivityFragment extends Fragment {
     }
 
     public void sendJoke(String joke) {
-
-        showProgressBar(false);
         Intent intentForLibrary = new Intent(getActivity(), DisplayJokeActivity.class);
         intentForLibrary.putExtra("JavaLibraryJoke", joke);
         startActivity(intentForLibrary);
